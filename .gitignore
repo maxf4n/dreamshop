@@ -1,7 +1,40 @@
-Мnode_modules/
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Database and data
 data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Cookies / sessions
+*.cookies.txt
+cookies.txt
+admin_cookies.txt
+*.cookie
+
+# Logs
 *.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
