@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DreamShop — Админ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body>
+  <!-- Login screen -->
+  <div id="loginScreen" class="login-screen">
+    <form id="loginForm" class="login-card" autocomplete="off">
+      <h1 class="login-title">DreamShop</h1>
+      <p class="login-sub">Панель администратора</p>
+      <label for="loginPassword">Пароль</label>
+      <input
+        type="password"
+        id="loginPassword"
+        autocomplete="current-password"
+        minlength="1"
+        required
+      />
+      <p id="loginError" class="error hidden"></p>
+      <button class="btn btn-primary" type="submit">Войти</button>
+    </form>
+  </div>
+
+  <!-- Admin app -->
+  <div id="adminApp" class="admin-app hidden">
+    <aside class="sidebar">
+      <div class="brand">DreamShop</div>
+      <nav class="nav">
+        <button class="nav-item active" data-tab="dashboard" type="button">Дашборд</button>
+        <button class="nav-item" data-tab="cities" type="button">Города</button>
+        <button class="nav-item" data-tab="districts" type="button">Районы</button>
+        <button class="nav-item" data-tab="products" type="button">Товары</button>
+        <button class="nav-item" data-tab="orders" type="button">Заказы</button>
+      </nav>
+      <button class="btn btn-outline logout" id="btnLogout" type="button">Выйти</button>
+    </aside>
+
+    <main class="content">
+      <!-- Dashboard -->
+      <section class="tab-panel" data-panel="dashboard">
+        <h2>Дашборд</h2>
+        <div class="stats" id="statsGrid">
+          <div class="stat"><div class="stat-value" id="stUsers">—</div><div class="stat-label">Пользователи</div></div>
+          <div class="stat"><div class="stat-value" id="stOrders">—</div><div class="stat-label">Всего заказов</div></div>
+          <div class="stat"><div class="stat-value" id="stPaid">—</div><div class="stat-label">Оплачено</div></div>
+          <div class="stat"><div class="stat-value" id="stUnpaid">—</div><div class="stat-label">Не оплачено</div></div>
+          <div class="stat"><div class="stat-value" id="stDeposit">—</div><div class="stat-label">Требуется депозит</div></div>
+          <div class="stat"><div class="stat-value" id="stRevenue">—</div><div class="stat-label">Выручка (оплачено)</div></div>
+        </div>
+      </section>
+
+      <!-- Cities -->
+      <section class="tab-panel hidden" data-panel="cities">
+        <h2>Города</h2>
+        <form class="form-row" id="cityForm">
+          <input type="hidden" id="cityId" />
+          <input type="text" id="cityName" placeholder="Название города" maxlength="100" required />
+          <label class="checkbox"><input type="checkbox" id="cityActive" checked /> активен</label>
+          <button class="btn btn-primary" type="submit" id="citySubmit">Добавить</button>
+          <button class="btn btn-ghost hidden" type="button" id="cityCancel">Отмена</button>
+        </form>
+        <table class="table" id="citiesTable">
+          <thead>
+            <tr><th>ID</th><th>Название</th><th>Активен</th><th>Создан</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Districts -->
+      <section class="tab-panel hidden" data-panel="districts">
+        <h2>Районы</h2>
+        <form class="form-row" id="districtForm">
+          <input type="hidden" id="districtId" />
+          <select id="districtCity" required></select>
+          <input type="text" id="districtName" placeholder="Название района" maxlength="100" required />
+          <label class="checkbox"><input type="checkbox" id="districtActive" checked /> активен</label>
+          <button class="btn btn-primary" type="submit" id="districtSubmit">Добавить</button>
+          <button class="btn btn-ghost hidden" type="button" id="districtCancel">Отмена</button>
+        </form>
+        <div class="filter-row">
+          <label for="districtFilterCity">Фильтр по городу:</label>
+          <select id="districtFilterCity"><option value="">Все города</option></select>
+        </div>
+        <table class="table" id="districtsTable">
+          <thead>
+            <tr><th>ID</th><th>Город</th><th>Название</th><th>Активен</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Products -->
+      <section class="tab-panel hidden" data-panel="products">
+        <h2>Товары</h2>
+        <form class="form-row wrap" id="productForm">
+          <input type="hidden" id="productId" />
+          <input type="text" id="productName" placeholder="Название" maxlength="120" required />
+          <input type="number" id="productPrice" placeholder="Цена за грамм (USD)" step="0.01" min="0.01" required />
+          <input type="number" id="productMin" placeholder="Мин. грамм (0.1)" step="0.1" min="0.1" required />
+          <label class="checkbox"><input type="checkbox" id="productActive" checked /> активен</label>
+          <textarea id="productDesc" placeholder="Описание" rows="2" maxlength="2000"></textarea>
+          <button class="btn btn-primary" type="submit" id="productSubmit">Добавить</button>
+          <button class="btn btn-ghost hidden" type="button" id="productCancel">Отмена</button>
+        </form>
+        <table class="table" id="productsTable">
+          <thead>
+            <tr>
+              <th>ID</th><th>Название</th><th>Цена/г</th><th>Мин. г</th>
+              <th>Активен</th><th>Описание</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Orders -->
+      <section class="tab-panel hidden" data-panel="orders">
+        <h2>Заказы</h2>
+        <div class="filter-row">
+          <label for="orderStatusFilter">Фильтр по статусу:</label>
+          <select id="orderStatusFilter">
+            <option value="">Все</option>
+            <option value="unpaid">Не оплачен</option>
+            <option value="paid">Оплачен</option>
+            <option value="security_deposit_required">Требуется депозит</option>
+          </select>
+          <button class="btn btn-ghost" type="button" id="ordersRefresh">Обновить</button>
+        </div>
+        <table class="table" id="ordersTable">
+          <thead>
+            <tr>
+              <th>ID</th><th>Пользователь</th><th>Город / Район</th><th>Состав</th>
+              <th>Сумма</th><th>Способ</th><th>Статус</th><th>Создан</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

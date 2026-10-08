@@ -1,0 +1,7 @@
+Мnode_modules/
+data/
+.env
+*.log
+.DS_Store
+.vscode/
+.idea/
