@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -24,34 +24,34 @@
       <div class="brand" id="brand">DreamShop</div>
       <div class="header-actions">
         <button id="btnCart" class="btn btn-ghost" type="button">
-          Корзина <span id="cartCount" class="badge">0</span>
+          Cart <span id="cartCount" class="badge">0</span>
         </button>
-        <button id="btnProfile" class="btn btn-ghost hidden" type="button">Профиль</button>
-        <button id="btnLogin" class="btn btn-primary" type="button">Войти</button>
+        <button id="btnProfile" class="btn btn-ghost hidden" type="button">Profile</button>
+        <button id="btnLogin" class="btn btn-primary" type="button">Sign In</button>
       </div>
     </header>
 
     <main class="main">
       <section class="selector">
         <div class="field">
-          <label for="cityInput">Город</label>
+          <label for="cityInput">City</label>
           <div class="combo" id="cityCombo">
             <input
               type="text"
               id="cityInput"
-              placeholder="Начните вводить название города"
+              placeholder="Start typing the city name"
               autocomplete="off"
             />
             <div class="combo-list hidden" id="cityList"></div>
           </div>
         </div>
         <div class="field">
-          <label for="districtInput">Район</label>
+          <label for="districtInput">District</label>
           <div class="combo" id="districtCombo">
             <input
               type="text"
               id="districtInput"
-              placeholder="Сначала выберите город"
+              placeholder="Select a city first"
               autocomplete="off"
               disabled
             />
@@ -61,12 +61,12 @@
       </section>
 
       <section id="productsSection" class="products hidden">
-        <h2 class="section-title">Товары</h2>
+        <h2 class="section-title">Products</h2>
         <ul id="productList" class="product-list"></ul>
       </section>
 
       <section id="emptyState" class="empty">
-        <p>Выберите город и район, чтобы увидеть товары.</p>
+        <p>Select a city and district to see products.</p>
       </section>
     </main>
   </div>
@@ -78,15 +78,15 @@
       <h3 id="pmTitle"></h3>
       <p id="pmDesc" class="muted"></p>
       <p class="pm-price">
-        Цена: <b id="pmPrice">$0.00</b> <span class="muted">/ г</span>
+        Price: <b id="pmPrice">$0.00</b> <span class="muted">/ g</span>
       </p>
       <p class="muted small" id="pmMin"></p>
-      <label for="pmQty">Количество (г)</label>
+      <label for="pmQty">Quantity (g)</label>
       <input type="number" id="pmQty" step="0.1" min="0.1" inputmode="decimal" />
       <p class="total">
-        Сумма: <b id="pmTotal">$0.00</b>
+        Total: <b id="pmTotal">$0.00</b>
       </p>
-      <button class="btn btn-primary" id="pmAdd" type="button">Добавить в корзину</button>
+      <button class="btn btn-primary" id="pmAdd" type="button">Add to Cart</button>
     </div>
   </div>
 
@@ -94,13 +94,13 @@
   <div id="cartModal" class="modal hidden" aria-hidden="true">
     <div class="modal-card wide">
       <button class="modal-close" data-close type="button">×</button>
-      <h3>Корзина</h3>
+      <h3>Cart</h3>
       <div id="cartItems" class="cart-items"></div>
-      <p id="cartEmpty" class="muted hidden">Корзина пуста.</p>
+      <p id="cartEmpty" class="muted hidden">Your cart is empty.</p>
       <p class="total">
-        Итого: <b id="cartTotal">$0.00</b>
+        Total: <b id="cartTotal">$0.00</b>
       </p>
-      <button class="btn btn-primary" id="cartCheckout" type="button">Оформить заказ</button>
+      <button class="btn btn-primary" id="cartCheckout" type="button">Checkout</button>
     </div>
   </div>
 
@@ -109,11 +109,11 @@
     <div class="modal-card">
       <button class="modal-close" data-close type="button">×</button>
       <div class="tabs">
-        <button class="tab active" data-tab="login" type="button">Вход</button>
-        <button class="tab" data-tab="register" type="button">Регистрация</button>
+        <button class="tab active" data-tab="login" type="button">Sign In</button>
+        <button class="tab" data-tab="register" type="button">Sign Up</button>
       </div>
       <form id="authForm" novalidate>
-        <label for="authUsername">Имя пользователя</label>
+        <label for="authUsername">Username</label>
         <input
           type="text"
           id="authUsername"
@@ -122,7 +122,7 @@
           maxlength="32"
           required
         />
-        <label for="authPassword">Пароль</label>
+        <label for="authPassword">Password</label>
         <input
           type="password"
           id="authPassword"
@@ -132,7 +132,7 @@
           required
         />
         <p id="authError" class="error hidden"></p>
-        <button type="submit" class="btn btn-primary" id="authSubmit">Войти</button>
+        <button type="submit" class="btn btn-primary" id="authSubmit">Sign In</button>
       </form>
     </div>
   </div>
@@ -141,17 +141,17 @@
   <div id="payModal" class="modal hidden" aria-hidden="true">
     <div class="modal-card">
       <button class="modal-close" data-close type="button">×</button>
-      <h3>Заказ #<span id="payOrderId"></span> оформлен</h3>
+      <h3>Order #<span id="payOrderId"></span> placed</h3>
       <p>
-        Сумма: <b id="payAmount">$0.00</b>
+        Amount: <b id="payAmount">$0.00</b>
       </p>
-      <p class="muted">Выберите способ оплаты:</p>
+      <p class="muted">Choose a payment method:</p>
       <div class="pay-options">
         <button class="btn btn-outline" id="payTelegram" type="button">
-          Связаться с менеджером в Telegram
+          Contact manager on Telegram
         </button>
         <button class="btn btn-primary" id="payCrypto" type="button">
-          Оплатить криптовалютой
+          Pay with Cryptocurrency
         </button>
       </div>
       <div id="payInfo" class="pay-info hidden"></div>
@@ -163,18 +163,18 @@
     <div class="modal-card wide">
       <button class="modal-close" data-close type="button">×</button>
       <div class="profile-header">
-        <h3>Профиль</h3>
-        <button class="btn btn-outline" id="btnLogout" type="button">Выйти</button>
+        <h3>Profile</h3>
+        <button class="btn btn-outline" id="btnLogout" type="button">Sign Out</button>
       </div>
       <p>
-        Пользователь: <b id="profileUsername">—</b>
+        User: <b id="profileUsername">—</b>
       </p>
-      <h4>Мои заказы</h4>
+      <h4>My Orders</h4>
       <div id="profileOrders" class="orders"></div>
     </div>
   </div>
 
-  <script src="/js/api.js"></script>
-  <script src="/js/app.js"></script>
+  <script src="/js/api.js?v=2"></script>
+  <script src="/js/app.js?v=2"></script>
 </body>
 </html>

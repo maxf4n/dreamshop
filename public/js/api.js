@@ -1,4 +1,4 @@
-/* Минимальная обёртка над fetch — общая для всех страниц DreamShop. */
+/* Minimal fetch wrapper — shared across all DreamShop pages. */
 (function (global) {
   async function req(method, url, body) {
     const opts = {

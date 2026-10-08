@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Оплата криптовалютой — DreamShop</title>
+  <title>Crypto Payment — DreamShop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -16,27 +16,23 @@
   <header class="pay-header">
     <a href="/" class="brand">DreamShop</a>
     <div class="order-meta">
-      <span class="order-id">Заказ #<span id="orderId">—</span></span>
+      <span class="order-id">Order #<span id="orderId">—</span></span>
       <span class="order-total" id="orderTotal">$0.00</span>
     </div>
   </header>
 
   <main class="pay-main">
-    <!-- Экран загрузки -->
-    <section id="loading" class="loading">Загрузка…</section>
+    <section id="loading" class="loading">Loading…</section>
 
-    <!-- Экран ошибки -->
     <section id="errorBox" class="error-box hidden">
-      <h2>Не удалось загрузить оплату</h2>
+      <h2>Could not load payment</h2>
       <p id="errorText" class="muted"></p>
-      <a href="/" class="btn btn-outline">Вернуться на главную</a>
+      <a href="/" class="btn btn-outline">Back to Home</a>
     </section>
 
-    <!-- Экран оплаты -->
     <section id="payScreen" class="pay-grid hidden">
-      <!-- Левая колонка: выбор -->
       <div class="pay-col-left">
-        <h3>Выберите валюту и сеть</h3>
+        <h3>Choose a currency and network</h3>
 
         <div class="coin-tabs" id="coinTabs"></div>
 
@@ -44,21 +40,20 @@
 
         <div class="pay-summary">
           <div class="row">
-            <span class="muted">Сумма заказа</span>
+            <span class="muted">Order total</span>
             <span id="sumFiat">$0.00</span>
           </div>
           <div class="row" id="rowRate" hidden>
-            <span class="muted">Курс</span>
+            <span class="muted">Rate</span>
             <span id="sumRate">—</span>
           </div>
           <div class="row total">
-            <span>К оплате</span>
+            <span>Amount due</span>
             <span id="sumCrypto">—</span>
           </div>
         </div>
       </div>
 
-      <!-- Правая колонка: реквизиты -->
       <div class="pay-col-right">
         <div class="pay-card">
           <div class="pay-coin-badge" id="coinBadge">
@@ -68,36 +63,36 @@
 
           <div class="field">
             <div class="field-label">
-              <span>Адрес для оплаты</span>
-              <button class="copy-btn" data-copy="address" type="button">Копировать</button>
+              <span>Payment address</span>
+              <button class="copy-btn" data-copy="address" type="button">Copy</button>
             </div>
             <div class="field-value mono" id="addressValue">—</div>
           </div>
 
           <div class="field">
             <div class="field-label">
-              <span>Сумма к отправке</span>
-              <button class="copy-btn" data-copy="amount" type="button">Копировать</button>
+              <span>Amount to send</span>
+              <button class="copy-btn" data-copy="amount" type="button">Copy</button>
             </div>
             <div class="field-value mono" id="amountValue">—</div>
           </div>
 
           <div class="qr-wrap">
-            <img id="qrImage" alt="QR-код для оплаты" />
+            <img id="qrImage" alt="Payment QR code" />
           </div>
 
           <p class="net-note muted small" id="netNote"></p>
 
           <div class="timer">
-            <span class="timer-label">Осталось</span>
+            <span class="timer-label">Time left</span>
             <span class="timer-value" id="timerValue">30:00</span>
           </div>
 
           <button class="btn btn-primary" id="btnPaid" type="button" disabled>
-            Я оплатил
+            I have paid
           </button>
           <p class="muted small center" id="paidHint">
-            Выберите валюту и сеть, чтобы перейти к оплате.
+            Select a currency and network to proceed.
           </p>
         </div>
       </div>
@@ -106,7 +101,7 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="/js/api.js"></script>
-  <script src="/js/pay.js"></script>
+  <script src="/js/api.js?v=2"></script>
+  <script src="/js/pay.js?v=2"></script>
 </body>
 </html>

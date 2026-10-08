@@ -13,14 +13,14 @@ const orderLimiter = rateLimit({
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Слишком много запросов, попробуйте позже' },
+  message: { error: 'Too many requests, please try again later.' },
 });
 
 const quantitySchema = z
   .number()
-  .positive('Количество должно быть положительным')
+  .positive('Quantity must be positive')
   .refine((v) => Math.abs(v * 10 - Math.round(v * 10)) < 1e-9, {
-    message: 'Точность — не более 0.1 г',
+    message: 'Precision is limited to 0.1 g',
   });
 
 const createOrderSchema = z.object({
@@ -33,8 +33,8 @@ const createOrderSchema = z.object({
         quantity_grams: quantitySchema,
       })
     )
-    .min(1, 'Корзина пуста')
-    .max(50, 'Слишком много позиций'),
+    .min(1, 'Cart is empty')
+    .max(50, 'Too many items'),
 });
 
 function round2(x) {
@@ -47,26 +47,26 @@ router.post('/', requireAuth, orderLimiter, async (req, res, next) => {
     if (!parsed.success) {
       return res
         .status(400)
-        .json({ error: 'Некорректные данные', details: parsed.error.issues });
+        .json({ error: 'Invalid data', details: parsed.error.issues });
     }
     const { city_id, district_id, items } = parsed.data;
 
     const city = db
       .prepare('SELECT id, name FROM cities WHERE id = ? AND is_active = 1')
       .get(city_id);
-    if (!city) return res.status(400).json({ error: 'Город не найден' });
+    if (!city) return res.status(400).json({ error: 'City not found' });
 
     const district = db
       .prepare('SELECT id, name, city_id FROM districts WHERE id = ? AND is_active = 1')
       .get(district_id);
     if (!district || district.city_id !== city_id) {
-      return res.status(400).json({ error: 'Район не найден в выбранном городе' });
+      return res.status(400).json({ error: 'District not found in the selected city' });
     }
 
     const user = db
       .prepare('SELECT id, username FROM users WHERE id = ?')
       .get(req.user.userId);
-    if (!user) return res.status(401).json({ error: 'Пользователь не найден' });
+    if (!user) return res.status(401).json({ error: 'User not found' });
 
     const productIds = [...new Set(items.map((i) => i.product_id))];
     const placeholders = productIds.map(() => '?').join(',');
@@ -85,15 +85,15 @@ router.post('/', requireAuth, orderLimiter, async (req, res, next) => {
     for (const item of items) {
       const p = productMap.get(item.product_id);
       if (!p || !p.is_active) {
-        return res.status(400).json({ error: `Товар ${item.product_id} недоступен` });
+        return res.status(400).json({ error: `Product ${item.product_id} is unavailable` });
       }
       if (item.quantity_grams + 1e-9 < Number(p.min_grams)) {
         return res.status(400).json({
-          error: `Минимальное количество для "${p.name}" — ${p.min_grams} г`,
+          error: `Minimum quantity for "${p.name}" is ${p.min_grams} g`,
         });
       }
       if (item.quantity_grams > 100000) {
-        return res.status(400).json({ error: 'Слишком большое количество' });
+        return res.status(400).json({ error: 'Quantity is too large' });
       }
 
       const amount = round2(Number(p.price_per_gram) * item.quantity_grams);
@@ -182,7 +182,7 @@ router.get('/my', requireAuth, (req, res) => {
 router.get('/:id', requireAuth, (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) {
-    return res.status(400).json({ error: 'Некорректный id' });
+    return res.status(400).json({ error: 'Invalid id' });
   }
 
   const order = db
@@ -195,9 +195,9 @@ router.get('/:id', requireAuth, (req, res) => {
     )
     .get(id);
 
-  if (!order) return res.status(404).json({ error: 'Заказ не найден' });
+  if (!order) return res.status(404).json({ error: 'Order not found' });
   if (order.user_id !== req.user.userId && req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Нет доступа' });
+    return res.status(403).json({ error: 'Access denied' });
   }
 
   const items = db
@@ -210,18 +210,18 @@ router.get('/:id', requireAuth, (req, res) => {
   res.json({ ...order, items });
 });
 
-/* ---------------- Telegram-менеджер ---------------- */
+/* ---------------- Telegram manager ---------------- */
 
 router.post('/:id/pay/telegram', requireAuth, (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) {
-    return res.status(400).json({ error: 'Некорректный id' });
+    return res.status(400).json({ error: 'Invalid id' });
   }
 
   const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-  if (!order) return res.status(404).json({ error: 'Заказ не найден' });
+  if (!order) return res.status(404).json({ error: 'Order not found' });
   if (order.user_id !== req.user.userId) {
-    return res.status(403).json({ error: 'Нет доступа' });
+    return res.status(403).json({ error: 'Access denied' });
   }
 
   db.prepare(
@@ -236,13 +236,13 @@ router.post('/:id/pay/telegram', requireAuth, (req, res) => {
   });
 });
 
-/* ---------------- Крипта — получение опций ---------------- */
+/* ---------------- Crypto — options ---------------- */
 
 router.get('/:id/crypto/options', requireAuth, async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({ error: 'Некорректный id' });
+      return res.status(400).json({ error: 'Invalid id' });
     }
 
     const order = db
@@ -255,9 +255,9 @@ router.get('/:id/crypto/options', requireAuth, async (req, res, next) => {
       )
       .get(id);
 
-    if (!order) return res.status(404).json({ error: 'Заказ не найден' });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
     if (order.user_id !== req.user.userId) {
-      return res.status(403).json({ error: 'Нет доступа' });
+      return res.status(403).json({ error: 'Access denied' });
     }
 
     const items = db
@@ -271,7 +271,6 @@ router.get('/:id/crypto/options', requireAuth, async (req, res, next) => {
       Number(order.total_amount)
     );
 
-    // Обогащаем QR-payload
     const enriched = options.map((o) => ({
       ...o,
       qrPayload: cryptoService.buildQrPayload(o),
@@ -304,32 +303,32 @@ router.get('/:id/crypto/options', requireAuth, async (req, res, next) => {
   }
 });
 
-/* ---------------- Крипта — выбор сети ---------------- */
+/* ---------------- Crypto — select network ---------------- */
 
 router.post('/:id/crypto/select', requireAuth, async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({ error: 'Некорректный id' });
+      return res.status(400).json({ error: 'Invalid id' });
     }
     const schema = z.object({ network_id: z.string().min(1).max(64) });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ error: 'Некорректные данные' });
+      return res.status(400).json({ error: 'Invalid data' });
     }
 
     const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-    if (!order) return res.status(404).json({ error: 'Заказ не найден' });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
     if (order.user_id !== req.user.userId) {
-      return res.status(403).json({ error: 'Нет доступа' });
+      return res.status(403).json({ error: 'Access denied' });
     }
     if (order.status === 'paid') {
-      return res.status(400).json({ error: 'Заказ уже оплачен' });
+      return res.status(400).json({ error: 'Order is already paid' });
     }
 
     const { options } = await cryptoService.getPaymentOptions(Number(order.total_amount));
     const opt = options.find((o) => o.id === parsed.data.network_id);
-    if (!opt) return res.status(400).json({ error: 'Сеть не найдена' });
+    if (!opt) return res.status(400).json({ error: 'Network not found' });
 
     db.prepare(
       `UPDATE orders
@@ -356,19 +355,19 @@ router.post('/:id/crypto/select', requireAuth, async (req, res, next) => {
   }
 });
 
-/* ---------------- Крипта — пользователь нажал «Я оплатил» ---------------- */
+/* ---------------- Crypto — user clicked "I have paid" ---------------- */
 
 router.post('/:id/crypto/mark-paid', requireAuth, (req, res, next) => {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({ error: 'Некорректный id' });
+      return res.status(400).json({ error: 'Invalid id' });
     }
 
     const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
-    if (!order) return res.status(404).json({ error: 'Заказ не найден' });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
     if (order.user_id !== req.user.userId) {
-      return res.status(403).json({ error: 'Нет доступа' });
+      return res.status(403).json({ error: 'Access denied' });
     }
 
     db.prepare(

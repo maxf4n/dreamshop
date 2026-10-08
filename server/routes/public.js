@@ -13,7 +13,7 @@ router.get('/cities', (req, res) => {
 router.get('/cities/:cityId/districts', (req, res) => {
   const cityId = Number(req.params.cityId);
   if (!Number.isInteger(cityId) || cityId <= 0) {
-    return res.status(400).json({ error: 'Некорректный id города' });
+    return res.status(400).json({ error: 'Invalid city id' });
   }
   const rows = db
     .prepare(

@@ -46,7 +46,7 @@ app.use('/api', (req, res) => {
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 const PORT = Number(process.env.PORT || 3000);

@@ -1,90 +1,67 @@
 // server/config/crypto.js
-//
 // Здесь ты вручную задаёшь адреса для приёма крипты.
-// Каждая сеть — это отдельный объект в массиве networks.
-// Замени плейсхолдеры (REPLACE_ME) на свои адреса.
-//
-// Курсы подтягиваются с CoinGecko каждые 60 секунд.
-// Если CoinGecko недоступен — используются значения из rateFallback.
+// Поля "note" видны пользователю на странице оплаты — оставляй их на английском.
 
 module.exports = {
-  // Валюта заказа (в ней хранятся цены товаров и total_amount)
   fiatCurrency: 'USD',
-
-  // Через сколько минут страница оплаты «протухает» (клиент увидит надпись «истёк»)
   paymentWindowMinutes: 30,
-
-  // Кэш курсов (секунд)
   rateCacheTtlSeconds: 60,
 
-  // Резервные курсы, если CoinGecko не ответил
   rateFallback: {
     USDT: 1.0,
     BTC: 65000,
     ETH: 3200,
   },
 
-  // id монет в CoinGecko
   coingeckoIds: {
     USDT: 'tether',
     BTC: 'bitcoin',
     ETH: 'ethereum',
   },
 
-  // ─── Сети ──────────────────────────────────────────────────────────────────
-  // id        — уникальный id (латиница, цифры, подчёркивание)
-  // coin      — тикер монеты
-  // network   — короткое имя сети
-  // networkLabel — как показывать пользователю
-  // address   — ТВОЙ адрес для приёма. ЗАМЕНИ!
-  // decimals  — сколько знаков после точки отдавать пользователю
-  // minUsd    — минимальная сумма в USD для этой сети
-  // enabled   — включена ли сеть (true/false)
-  // color     — цвет для иконки монеты
-  // note      — текст для пользователя (например, про комиссию сети)
   networks: [
     {
       id: 'usdt_trc20',
       coin: 'USDT',
       network: 'TRC20',
       networkLabel: 'TRON (TRC20)',
-      address: 'TREPLACE_ME_TRC20_ADDRESS',
+      address: 'TLuUZTWmR45Prcjdun5Q16Bbmc5PxozV8J',
       decimals: 2,
       minUsd: 1,
       enabled: true,
       color: '#26a17b',
-      note: 'Комиссия сети ~1 USDT',
+      note: 'Network fee ~1 USDT',
     },
     {
       id: 'usdt_erc20',
       coin: 'USDT',
       network: 'ERC20',
       networkLabel: 'Ethereum (ERC20)',
-      address: '0xREPLACE_ME_ERC20_ADDRESS',
+      address: '0x02f36e3e0f435762def1cb0a538c758dbf17027f',
       decimals: 2,
       minUsd: 10,
       enabled: true,
       color: '#26a17b',
-      note: 'Высокая комиссия сети Ethereum',
+      note: 'High Ethereum network fee',
     },
     {
       id: 'usdt_bep20',
       coin: 'USDT',
       network: 'BEP20',
       networkLabel: 'BNB Smart Chain (BEP20)',
-      address: '0xREPLACE_ME_BEP20_ADDRESS',
+      address: '0x02f36e3e0f435762def1cb0a538c758dbf17027f',
       decimals: 2,
       minUsd: 1,
       enabled: true,
       color: '#26a17b',
-      note: 'Комиссия сети ~0.3 USDT',
+      note: 'Network fee ~0.3 USDT',
     },
     {
       id: 'btc',
       coin: 'BTC',
       network: 'BTC',
       networkLabel: 'Bitcoin',
-      address: 'REPLACE_ME_BTC_ADDRESS',
+      address: '3Gso1NV68V2kYs6EoGtjd1FQQG9kUjS8Vs',
       decimals: 8,
       minUsd: 5,
       enabled: true,
@@ -96,24 +73,24 @@ module.exports = {
       coin: 'ETH',
       network: 'ERC20',
       networkLabel: 'Ethereum (ERC20)',
-      address: '0xREPLACE_ME_ETH_ERC20_ADDRESS',
+      address: '0x0022b6813b936E5eF0EE5D058B75C8882cdB7E52',
       decimals: 6,
       minUsd: 10,
       enabled: true,
       color: '#627eea',
-      note: 'Высокая комиссия сети Ethereum',
+      note: 'High Ethereum network fee',
     },
     {
       id: 'eth_bep20',
       coin: 'ETH',
       network: 'BEP20',
       networkLabel: 'BNB Smart Chain (BEP20)',
-      address: '0xREPLACE_ME_ETH_BEP20_ADDRESS',
+      address: '0x02f36e3e0f435762def1cb0a538c758dbf17027f',
       decimals: 6,
       minUsd: 5,
       enabled: true,
       color: '#627eea',
-      note: 'BEP20-версия ETH',
+      note: 'BEP20-wrapped ETH',
     },
   ],
 };

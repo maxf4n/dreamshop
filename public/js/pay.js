@@ -6,7 +6,7 @@
 
   const state = {
     orderId: null,
-    data: null,       // ответ от /crypto/options
+    data: null,
     selectedNetworkId: null,
     selectedOption: null,
     timerInterval: null,
@@ -76,7 +76,6 @@
     $('#orderTotal').textContent = money(order.total_amount);
     $('#sumFiat').textContent = money(order.total_amount);
 
-    // Собираем уникальные монеты
     const coins = [];
     const seen = new Set();
     for (const o of options) {
@@ -86,23 +85,19 @@
       }
     }
 
-    // Если заказ уже был оформлен на сеть — выбираем её
     if (order.crypto_network_id && options.some((o) => o.id === order.crypto_network_id)) {
       state.selectedNetworkId = order.crypto_network_id;
     } else if (!state.selectedNetworkId) {
-      // Иначе — первая доступная монета и первая её сеть
       const firstCoin = coins[0];
       const firstNet = options.find((o) => o.coin === firstCoin && o.eligible)
         || options.find((o) => o.coin === firstCoin);
       if (firstNet) state.selectedNetworkId = firstNet.id;
     }
 
-    // Активная монета
     const activeCoin = state.selectedNetworkId
       ? options.find((o) => o.id === state.selectedNetworkId)?.coin
       : coins[0];
 
-    // Coin tabs
     const tabs = $('#coinTabs');
     tabs.innerHTML = '';
     coins.forEach((coin) => {
@@ -120,7 +115,6 @@
       tabs.appendChild(btn);
     });
 
-    // Networks
     const list = $('#networkList');
     list.innerHTML = '';
     options
@@ -133,7 +127,7 @@
         div.innerHTML = `
           <div>
             <div class="net-name">${escapeHtml(o.networkLabel)}</div>
-            <div class="net-sub">${o.eligible ? `Мин. ${money(o.minUsd)}` : `Минимум ${money(o.minUsd)}`}</div>
+            <div class="net-sub">${o.eligible ? `Min ${money(o.minUsd)}` : `Minimum ${money(o.minUsd)}`}</div>
           </div>
           <div class="net-amount">
             ${escapeHtml(o.amountString)} ${escapeHtml(o.coin)}
@@ -142,7 +136,7 @@
         `;
         div.addEventListener('click', () => {
           if (!o.eligible) {
-            toast(`Минимум для этой сети — ${money(o.minUsd)}`, 'error');
+            toast(`Minimum for this network is ${money(o.minUsd)}`, 'error');
             return;
           }
           selectNetwork(o.id);
@@ -150,7 +144,6 @@
         list.appendChild(div);
       });
 
-    // Если заказ уже оплачен — показываем заглушку вместо формы
     if (order.status === 'paid') {
       showAlreadyPaid();
       return;
@@ -160,7 +153,6 @@
       return;
     }
 
-    // Если сеть ещё не выбрана — не рисуем карточку
     if (!state.selectedNetworkId) {
       $('#payCard') && $('#payCard').remove();
       return;
@@ -181,29 +173,25 @@
     $('#rowRate').hidden = false;
     $('#sumCrypto').textContent = `${opt.amountString} ${opt.coin}`;
 
-    // QR
     const qrData = encodeURIComponent(opt.qrPayload || opt.address);
     $('#qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${qrData}`;
 
     $('#netNote').textContent = opt.note || '';
 
-    // Кнопка «Я оплатил»
     const btn = $('#btnPaid');
     btn.disabled = false;
     btn.onclick = markPaid;
-    $('#paidHint').textContent = 'После отправки нажмите «Я оплатил» — менеджер подтвердит поступление.';
+    $('#paidHint').textContent = 'After sending, click "I have paid" — the manager will confirm receipt.';
   }
 
   async function selectNetwork(networkId) {
     state.selectedNetworkId = networkId;
-    // Сохраняем выбор на сервере (best-effort)
     try {
       await API.post(`/api/orders/${state.orderId}/crypto/select`, { network_id: networkId });
     } catch (e) {
       console.warn('select network failed', e);
     }
     render();
-    // Скроллим карточку в поле зрения
     const card = document.querySelector('.pay-card');
     if (card && window.innerWidth <= 820) {
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -216,7 +204,7 @@
       state.markedPaid = true;
       showMarkedPaid();
     } catch (e) {
-      toast('Ошибка: ' + e.message, 'error');
+      toast('Error: ' + e.message, 'error');
     }
   }
 
@@ -225,14 +213,14 @@
     screen.innerHTML = `
       <div class="paid-success" style="grid-column: 1 / -1">
         <div class="check">✓</div>
-        <h2>Спасибо! Мы получили вашу отметку об оплате</h2>
+        <h2>Thank you! We received your payment notice</h2>
         <p class="muted">
-          Как только поступление подтвердится, статус заказа изменится на «Оплачен».
-          Это обычно занимает от 5 до 30 минут (зависит от загрузки сети).
+          Once the transfer is confirmed, the order status will change to "Paid".
+          This usually takes 5 to 30 minutes depending on network load.
         </p>
-        <p class="muted small">Заказ #${escapeHtml(state.orderId)}</p>
+        <p class="muted small">Order #${escapeHtml(state.orderId)}</p>
         <a href="/" class="btn btn-outline" style="display:inline-block;margin-top:16px">
-          Вернуться на главную
+          Back to Home
         </a>
       </div>
     `;
@@ -243,16 +231,14 @@
     screen.innerHTML = `
       <div class="paid-success" style="grid-column: 1 / -1">
         <div class="check">✓</div>
-        <h2>Заказ уже оплачен</h2>
-        <p class="muted">Заказ #${escapeHtml(state.orderId)} — статус «Оплачен».</p>
+        <h2>Order already paid</h2>
+        <p class="muted">Order #${escapeHtml(state.orderId)} — status "Paid".</p>
         <a href="/" class="btn btn-outline" style="display:inline-block;margin-top:16px">
-          Вернуться на главную
+          Back to Home
         </a>
       </div>
     `;
   }
-
-  /* ---------- Copy buttons ---------- */
 
   function setupCopy() {
     document.addEventListener('click', async (e) => {
@@ -264,14 +250,12 @@
       const text = which === 'address' ? opt.address : `${opt.amountString}`;
       try {
         await navigator.clipboard.writeText(text);
-        toast('Скопировано', 'success');
+        toast('Copied', 'success');
       } catch {
-        toast('Не удалось скопировать', 'error');
+        toast('Copy failed', 'error');
       }
     });
   }
-
-  /* ---------- Boot ---------- */
 
   async function boot() {
     setupCopy();
@@ -280,7 +264,7 @@
     if (!state.orderId) {
       $('#loading').classList.add('hidden');
       $('#errorBox').classList.remove('hidden');
-      $('#errorText').textContent = 'Не указан номер заказа в ссылке (?order=…).';
+      $('#errorText').textContent = 'Order ID is missing from the URL (?order=…).';
       return;
     }
 
@@ -299,13 +283,13 @@
       $('#errorBox').classList.remove('hidden');
       if (err.status === 401) {
         $('#errorText').textContent =
-          'Вы не авторизованы. Войдите в аккаунт и откройте эту ссылку снова.';
+          'You are not signed in. Please log in and open this link again.';
       } else if (err.status === 403) {
-        $('#errorText').textContent = 'Это не ваш заказ.';
+        $('#errorText').textContent = 'This is not your order.';
       } else if (err.status === 404) {
-        $('#errorText').textContent = 'Заказ не найден.';
+        $('#errorText').textContent = 'Order not found.';
       } else {
-        $('#errorText').textContent = err.message || 'Ошибка загрузки.';
+        $('#errorText').textContent = err.message || 'Failed to load.';
       }
     }
   }

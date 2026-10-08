@@ -14,7 +14,7 @@
     cart: [], // [{ product_id, name, price_per_gram, min_grams, quantity_grams }]
     currentProduct: null,
     authMode: 'login', // 'login' | 'register'
-    pendingCheckout: false, // true, если после логина нужно оформить заказ
+    pendingCheckout: false,
   };
 
   /* ---------------- Helpers ---------------- */
@@ -27,7 +27,6 @@
   }
 
   function gramsFmt(n) {
-    // Убираем .0 у целых, оставляем .X для дробных
     const num = Number(n);
     if (!Number.isFinite(num)) return '0';
     return Number.isInteger(num) ? String(num) : num.toFixed(1);
@@ -76,7 +75,7 @@
 
   /* ---------------- Cart ---------------- */
 
-    const CART_STORAGE_KEY = 'dreamshop_cart_v1';
+  const CART_STORAGE_KEY = 'dreamshop_cart_v1';
 
   function saveCart() {
     try {
@@ -92,7 +91,6 @@
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return;
-      // Валидация: оставляем только корректные позиции
       state.cart = parsed
         .filter(
           (it) =>
@@ -150,13 +148,13 @@
       div.innerHTML = `
         <div>
           <div class="ci-name">${escapeHtml(it.name)}</div>
-          <div class="ci-sub">${money(it.price_per_gram)} / г · мин ${gramsFmt(it.min_grams)} г</div>
+          <div class="ci-sub">${money(it.price_per_gram)} / g · min ${gramsFmt(it.min_grams)} g</div>
         </div>
         <input class="ci-qty" type="number" step="0.1" min="${it.min_grams}" value="${gramsFmt(
         it.quantity_grams
       )}" data-idx="${idx}" />
         <div class="ci-amount">${money(amount)}</div>
-        <button class="ci-remove" data-remove="${idx}" type="button" title="Удалить">×</button>
+        <button class="ci-remove" data-remove="${idx}" type="button" title="Remove">×</button>
       `;
       wrap.appendChild(div);
     });
@@ -186,7 +184,6 @@
         quantity_grams: Number(qty),
       });
     }
-    // Нормализуем точность до 0.1
     state.cart.forEach((it) => {
       it.quantity_grams = Math.round(it.quantity_grams * 10) / 10;
     });
@@ -195,7 +192,7 @@
     saveCart();
   }
 
-  /* ---------------- Combobox (city / district) ---------------- */
+  /* ---------------- Combobox ---------------- */
 
   function setupCombo({ inputId, listId, comboId, getItems, onSelect, disabled }) {
     const input = $('#' + inputId);
@@ -213,7 +210,7 @@
       if (filtered.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'combo-item empty';
-        empty.textContent = items.length ? 'Ничего не найдено' : 'Нет данных';
+        empty.textContent = items.length ? 'Nothing found' : 'No data';
         list.appendChild(empty);
       } else {
         filtered.forEach((it) => {
@@ -247,7 +244,6 @@
     );
 
     input.addEventListener('blur', () => {
-      // даём сработать mousedown
       setTimeout(() => list.classList.add('hidden'), 120);
     });
 
@@ -343,7 +339,7 @@
     if (state.products.length === 0) {
       const li = document.createElement('li');
       li.className = 'empty';
-      li.textContent = 'Товары пока не добавлены.';
+      li.textContent = 'No products yet.';
       ul.appendChild(li);
       return;
     }
@@ -358,7 +354,7 @@
           <div class="product-desc">${escapeHtml(p.description || '')}</div>
         </div>
         <div class="product-price">
-          ${money(p.price_per_gram)}<span class="per">/ г</span>
+          ${money(p.price_per_gram)}<span class="per">/ g</span>
         </div>
       `;
       li.addEventListener('click', () => openProductModal(p));
@@ -373,7 +369,7 @@
     $('#pmTitle').textContent = product.name;
     $('#pmDesc').textContent = product.description || '';
     $('#pmPrice').textContent = money(product.price_per_gram);
-    $('#pmMin').textContent = `Минимальный заказ: ${gramsFmt(product.min_grams)} г`;
+    $('#pmMin').textContent = `Minimum order: ${gramsFmt(product.min_grams)} g`;
 
     const qtyInput = $('#pmQty');
     qtyInput.min = String(product.min_grams);
@@ -408,7 +404,7 @@
     $$('.tab').forEach((t) =>
       t.classList.toggle('active', t.dataset.tab === state.authMode)
     );
-    $('#authSubmit').textContent = state.authMode === 'login' ? 'Войти' : 'Зарегистрироваться';
+    $('#authSubmit').textContent = state.authMode === 'login' ? 'Sign In' : 'Sign Up';
     $('#authError').classList.add('hidden');
     $('#authForm').reset();
     openModal('authModal');
@@ -421,19 +417,18 @@
     const errorEl = $('#authError');
     errorEl.classList.add('hidden');
 
-    // Клиентская валидация до отправки
     if (username.length < 3) {
-      errorEl.textContent = 'Имя пользователя — минимум 3 символа.';
+      errorEl.textContent = 'Username must be at least 3 characters.';
       errorEl.classList.remove('hidden');
       return;
     }
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      errorEl.textContent = 'Имя пользователя: только латиница, цифры и знак подчёркивания.';
+      errorEl.textContent = 'Username may only contain letters, digits, and underscore.';
       errorEl.classList.remove('hidden');
       return;
     }
     if (password.length < 6) {
-      errorEl.textContent = 'Пароль — минимум 6 символов.';
+      errorEl.textContent = 'Password must be at least 6 characters.';
       errorEl.classList.remove('hidden');
       return;
     }
@@ -450,7 +445,7 @@
         doCheckout();
       }
     } catch (err) {
-      errorEl.textContent = err.message || 'Ошибка';
+      errorEl.textContent = err.message || 'Error';
       errorEl.classList.remove('hidden');
     }
   }
@@ -460,7 +455,7 @@
   async function doCheckout() {
     if (state.cart.length === 0) return;
     if (!state.selectedCity || !state.selectedDistrict) {
-      alert('Выберите город и район.');
+      alert('Please select a city and district.');
       return;
     }
 
@@ -475,14 +470,12 @@
 
     try {
       const order = await API.post('/api/orders', payload);
-      // Очищаем корзину
       state.cart = [];
       updateCartBadge();
       renderCart();
       saveCart();
       closeModal('cartModal');
 
-      // Открываем модалку оплаты
       $('#payOrderId').textContent = String(order.id);
       $('#payAmount').textContent = money(order.total_amount);
       $('#payInfo').classList.add('hidden');
@@ -491,7 +484,7 @@
       $('#payCrypto').disabled = false;
       openModal('payModal');
     } catch (err) {
-      alert('Не удалось оформить заказ: ' + (err.message || 'ошибка'));
+      alert('Could not place order: ' + (err.message || 'error'));
     }
   }
 
@@ -506,20 +499,19 @@
         '';
       const info = $('#payInfo');
       info.innerHTML = link
-        ? `Для оплаты свяжитесь с менеджером: <a href="${escapeHtml(
+        ? `To complete payment, contact the manager: <a href="${escapeHtml(
             link
           )}" target="_blank" rel="noopener">${escapeHtml(link)}</a>`
-        : 'Ссылка на менеджера не настроена. Обратитесь в поддержку.';
+        : 'Manager link is not configured. Please contact support.';
       info.classList.remove('hidden');
     } catch (err) {
-      alert('Ошибка: ' + (err.message || 'не удалось'));
+      alert('Error: ' + (err.message || 'failed'));
     }
   }
 
   function payCrypto() {
     const orderId = Number($('#payOrderId').textContent);
     if (!orderId) return;
-    // Открываем страницу оплаты в новом табе
     window.open(`/pay?order=${orderId}`, '_blank', 'noopener');
     closeModal('payModal');
   }
@@ -530,11 +522,11 @@
     if (!state.user) return;
     openModal('profileModal');
     const wrap = $('#profileOrders');
-    wrap.innerHTML = '<p class="muted">Загрузка…</p>';
+    wrap.innerHTML = '<p class="muted">Loading…</p>';
     try {
       const orders = await API.get('/api/orders/my');
       if (!orders.length) {
-        wrap.innerHTML = '<p class="muted">Заказов пока нет.</p>';
+        wrap.innerHTML = '<p class="muted">No orders yet.</p>';
         return;
       }
       wrap.innerHTML = '';
@@ -547,40 +539,40 @@
             <li>
               <span>${escapeHtml(it.product_name_snapshot)} — ${gramsFmt(
               it.quantity_grams
-            )} г</span>
+            )} g</span>
               <span>${money(it.amount)}</span>
             </li>`
           )
           .join('');
         card.innerHTML = `
           <div class="order-head">
-            <span class="order-id">Заказ #${o.id}</span>
+            <span class="order-id">Order #${o.id}</span>
             <span class="status-pill status-${o.status}">${statusLabel(o.status)}</span>
           </div>
           <div class="order-meta">
             ${escapeHtml(o.city_name)} · ${escapeHtml(o.district_name)} · ${new Date(
           o.created_at + 'Z'
-        ).toLocaleString('ru-RU')}
+        ).toLocaleString('en-US')}
           </div>
           <ul class="order-items">${itemsHtml}</ul>
           <div class="order-head" style="margin-top:8px">
-            <span class="muted small">Итого</span>
+            <span class="muted small">Total</span>
             <span class="order-total">${money(o.total_amount)}</span>
           </div>
         `;
         wrap.appendChild(card);
       });
     } catch (err) {
-      wrap.innerHTML = `<p class="error">Не удалось загрузить заказы: ${escapeHtml(
+      wrap.innerHTML = `<p class="error">Could not load orders: ${escapeHtml(
         err.message || ''
       )}</p>`;
     }
   }
 
   function statusLabel(s) {
-    if (s === 'paid') return 'Оплачен';
-    if (s === 'security_deposit_required') return 'Требуется депозит';
-    return 'Не оплачен';
+    if (s === 'paid') return 'Paid';
+    if (s === 'security_deposit_required') return 'Security Deposit Required';
+    return 'Unpaid';
   }
 
   async function logout() {
@@ -601,7 +593,6 @@
   /* ---------------- Wire up ---------------- */
 
   function wireUp() {
-    // Модалки закрываются по крестику и по клику на фон
     document.addEventListener('click', (e) => {
       const closeBtn = e.target.closest('[data-close]');
       if (closeBtn) {
@@ -622,7 +613,6 @@
       if (e.key === 'Escape') closeAllModals();
     });
 
-    // Кнопки шапки
     $('#btnLogin').addEventListener('click', () => openAuthModal('login'));
     $('#btnProfile').addEventListener('click', openProfile);
     $('#btnLogout').addEventListener('click', logout);
@@ -631,36 +621,32 @@
       openModal('cartModal');
     });
 
-    // Auth tabs
     $$('.tab').forEach((tab) => {
       tab.addEventListener('click', () => openAuthModal(tab.dataset.tab));
     });
     $('#authForm').addEventListener('submit', submitAuth);
 
-    // Product modal
     $('#pmQty').addEventListener('input', recalcProductModal);
     $('#pmAdd').addEventListener('click', () => {
       const p = state.currentProduct;
       if (!p) return;
       const qty = Number($('#pmQty').value);
       if (!Number.isFinite(qty) || qty <= 0) {
-        alert('Введите корректное количество');
+        alert('Please enter a valid quantity.');
         return;
       }
       if (qty + 1e-9 < Number(p.min_grams)) {
-        alert(`Минимальное количество — ${gramsFmt(p.min_grams)} г`);
+        alert(`Minimum quantity is ${gramsFmt(p.min_grams)} g.`);
         return;
       }
-      // Проверка точности 0.1
       if (Math.abs(qty * 10 - Math.round(qty * 10)) > 1e-9) {
-        alert('Точность — не более 0.1 г');
+        alert('Precision is limited to 0.1 g.');
         return;
       }
       addToCart(p, qty);
       closeModal('productModal');
     });
 
-    // Cart interactions
     $('#cartItems').addEventListener('input', (e) => {
       const t = e.target;
       if (!t.classList.contains('ci-qty')) return;
@@ -672,7 +658,6 @@
       if (val + 1e-9 < item.min_grams) val = item.min_grams;
       val = Math.round(val * 10) / 10;
       item.quantity_grams = val;
-      // Не перерисовываем весь список, чтобы не терять фокус — обновим только сумму
       renderCart();
       saveCart();
     });
@@ -691,13 +676,12 @@
     $('#cartCheckout').addEventListener('click', () => {
       if (state.cart.length === 0) return;
       if (!state.selectedCity || !state.selectedDistrict) {
-        alert('Выберите город и район.');
+        alert('Please select a city and district.');
         return;
       }
       requireLogin(() => doCheckout());
     });
 
-    // Pay buttons
     $('#payTelegram').addEventListener('click', payTelegram);
     $('#payCrypto').addEventListener('click', payCrypto);
   }
@@ -708,7 +692,6 @@
     runSplash();
     wireUp();
 
-    // Комбобокс города
     setupCombo({
       inputId: 'cityInput',
       listId: 'cityList',
@@ -721,14 +704,13 @@
         const dInput = $('#districtInput');
         dInput.disabled = false;
         dInput.value = '';
-        dInput.placeholder = 'Начните вводить название района';
+        dInput.placeholder = 'Start typing the district name';
         await loadDistricts(city.id);
         renderProducts();
       },
       disabled: () => false,
     });
 
-    // Комбобокс района
     setupCombo({
       inputId: 'districtInput',
       listId: 'districtList',
@@ -741,7 +723,6 @@
       disabled: () => !state.selectedCity,
     });
 
-    // Данные
     await Promise.all([loadSettings(), loadCities(), loadProducts(), loadUser()]);
 
     loadCart();
